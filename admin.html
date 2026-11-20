@@ -1,0 +1,295 @@
+<!doctype html>
+<html lang="zh-Hant-TW">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<title>實績管理｜聚禾工程顧問</title>
+<link rel="icon" href="assets/img/rice.png">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root { --brown:#6b4423; --brown-dark:#3e2814; --gold:#e3a632; --gold-soft:#f4dca6; --cream:#fbf7ee; --sand:#f3ead6; --ink:#2d2620; --muted:#6f655a; --line:#e4d9c4; --danger:#b3361f; --ok:#3d6324; }
+  * { box-sizing: border-box; }
+  body { margin:0; font-family:"Noto Sans TC","Microsoft JhengHei",sans-serif; background:var(--cream); color:var(--ink); line-height:1.6; }
+  header { background:var(--brown-dark); color:#fff; padding:14px 0; position:sticky; top:0; z-index:5; }
+  .wrap { width:min(1200px,100% - 32px); margin-inline:auto; }
+  header .wrap { display:flex; align-items:center; gap:12px; flex-wrap:wrap; }
+  header h1 { font-size:1.15rem; margin:0; flex:1; display:flex; align-items:center; gap:10px; }
+  header img { height:30px; background:#fff; border-radius:6px; padding:2px; }
+  .state { font-size:.85rem; padding:2px 10px; border-radius:999px; background:rgba(255,255,255,.15); }
+  .state.dirty { background:var(--gold); color:var(--brown-dark); font-weight:700; }
+  button, .btn { font:inherit; border:1px solid var(--line); background:#fff; color:var(--ink); padding:7px 14px; border-radius:8px; cursor:pointer; text-decoration:none; display:inline-block; }
+  button:hover, .btn:hover { background:var(--sand); }
+  .primary { background:var(--brown); border-color:var(--brown); color:#fff; }
+  .primary:hover { background:var(--brown-dark); }
+  header button, header .btn { border-color:rgba(255,255,255,.3); background:transparent; color:#fff; }
+  header button:hover, header .btn:hover { background:rgba(255,255,255,.12); }
+  header .primary { background:var(--gold); border-color:var(--gold); color:var(--brown-dark); font-weight:700; }
+  main { padding:24px 0 60px; }
+  .help { background:#fff; border:1px solid var(--line); border-left:4px solid var(--gold); border-radius:10px; padding:12px 16px; font-size:.9rem; color:var(--muted); margin-bottom:18px; }
+  .help ol { margin:4px 0 0; padding-left:1.3em; }
+  .toolbar { display:flex; gap:10px; flex-wrap:wrap; align-items:center; margin-bottom:12px; }
+  .toolbar input, .toolbar select { font:inherit; padding:7px 10px; border:1px solid var(--line); border-radius:8px; background:#fff; }
+  .toolbar input { flex:1; min-width:200px; }
+  .count { color:var(--muted); font-size:.9rem; }
+  .table-wrap { background:#fff; border-radius:12px; border:1px solid var(--line); overflow:auto; }
+  table { width:100%; border-collapse:collapse; font-size:.92rem; }
+  th { background:var(--sand); text-align:left; padding:10px 12px; white-space:nowrap; position:sticky; top:0; }
+  td { padding:8px 12px; border-top:1px solid var(--line); vertical-align:top; }
+  td.actions { white-space:nowrap; text-align:right; }
+  td.actions button { padding:3px 10px; font-size:.85rem; }
+  .del { color:var(--danger); }
+  .tag { display:inline-block; font-size:.78rem; padding:0 8px; border-radius:6px; background:var(--gold-soft); white-space:nowrap; }
+  .st-done { color:var(--ok); } .st-other { color:var(--danger); font-weight:700; }
+  dialog { border:0; border-radius:14px; padding:0; width:min(640px,100% - 32px); box-shadow:0 20px 60px rgba(0,0,0,.25); }
+  dialog::backdrop { background:rgba(30,20,10,.45); }
+  dialog form { padding:22px; display:grid; gap:12px; }
+  dialog h2 { margin:0 0 4px; font-size:1.15rem; }
+  label { display:grid; gap:4px; font-size:.88rem; color:var(--muted); }
+  label input, label select, label textarea { font:inherit; color:var(--ink); padding:8px 10px; border:1px solid var(--line); border-radius:8px; background:var(--cream); }
+  .row2 { display:grid; grid-template-columns:1fr 1fr; gap:12px; }
+  .dlg-actions { display:flex; justify-content:flex-end; gap:8px; margin-top:6px; }
+  .toast { position:fixed; bottom:20px; left:50%; transform:translateX(-50%); background:var(--brown-dark); color:#fff; padding:10px 18px; border-radius:999px; opacity:0; transition:.3s; pointer-events:none; z-index:20; }
+  .toast.show { opacity:1; }
+  @media (max-width:640px){ .row2{grid-template-columns:1fr;} th:nth-child(4),td:nth-child(4){display:none;} }
+</style>
+</head>
+<body>
+<header>
+  <div class="wrap">
+    <h1><img src="assets/img/rice.png" alt="">工作實績管理 <span id="state" class="state">已載入</span></h1>
+    <button id="btn-open" title="選取網站的 assets/data/projects.js，之後可直接儲存覆蓋">開啟資料檔</button>
+    <button id="btn-save" class="primary">儲存</button>
+    <a class="btn" href="index.html#projects" target="_blank">預覽網站</a>
+  </div>
+</header>
+
+<main class="wrap">
+  <div class="help">
+    <strong>使用方式</strong>
+    <ol>
+      <li>新增、修改或刪除實績（變更會暫存在本瀏覽器，不會遺失）。</li>
+      <li>按「儲存」：若已「開啟資料檔」（Chrome／Edge），會直接覆蓋 <code>assets/data/projects.js</code>；否則會下載新的 <code>projects.js</code>，請放回網站的 <code>assets/data/</code> 資料夾覆蓋舊檔。</li>
+      <li>重新整理網站即可看到更新；網站會自動依年度由新到舊排列。</li>
+    </ol>
+  </div>
+
+  <div class="toolbar">
+    <button id="btn-add" class="primary">＋ 新增實績</button>
+    <button id="btn-paste">從 Excel 貼上</button>
+    <select id="f-cat"><option value="">全部分類</option></select>
+    <input id="f-q" type="search" placeholder="搜尋計畫名稱、委託單位、年度…">
+    <span class="count" id="count"></span>
+  </div>
+
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>年度</th><th>分類</th><th>服務工作（契約）名稱</th><th>委託單位</th><th>履約狀況</th><th></th></tr></thead>
+      <tbody id="rows"></tbody>
+    </table>
+  </div>
+  <p style="margin-top:14px"><button id="btn-reset" class="del">放棄未存檔的變更，重新載入資料檔</button></p>
+</main>
+
+<dialog id="dlg">
+  <form method="dialog" id="frm">
+    <h2 id="dlg-title">新增實績</h2>
+    <div class="row2">
+      <label>分類
+        <input name="category" list="cat-list" required>
+      </label>
+      <label>年度（民國，可填區間如 111–112）
+        <input name="year" required>
+      </label>
+    </div>
+    <label>服務工作（契約）名稱<textarea name="name" rows="2" required></textarea></label>
+    <label>委託單位<input name="client" list="client-list" required></label>
+    <label>履約狀況
+      <input name="status" list="status-list" value="已完成">
+    </label>
+    <div class="dlg-actions">
+      <button type="button" id="dlg-cancel">取消</button>
+      <button type="submit" class="primary">確定</button>
+    </div>
+  </form>
+</dialog>
+
+<dialog id="dlg-paste">
+  <form method="dialog" id="frm-paste">
+    <h2>從 Excel 貼上</h2>
+    <p style="margin:0;font-size:.88rem;color:var(--muted)">在 Excel 依序排好欄位：<b>分類｜年度｜計畫名稱｜委託單位｜履約狀況</b>（不含標題列），選取後複製貼到下方。</p>
+    <textarea id="paste-text" rows="8" style="font:inherit;padding:8px;border:1px solid var(--line);border-radius:8px"></textarea>
+    <div class="dlg-actions">
+      <button type="button" id="paste-cancel">取消</button>
+      <button type="submit" class="primary">加入</button>
+    </div>
+  </form>
+</dialog>
+
+<datalist id="cat-list"></datalist>
+<datalist id="client-list"></datalist>
+<datalist id="status-list"><option>已完成</option><option>結案中</option><option>執行中</option></datalist>
+<div class="toast" id="toast"></div>
+
+<script src="assets/data/projects.js"></script>
+<script>
+(() => {
+  const DRAFT_KEY = 'geoharvester-projects-draft';
+  const FIELDS = ['category', 'year', 'name', 'client', 'status'];
+  const CAT_ORDER = ['大規模崩塌', '地質調查', '山坡地與集水區', '溫泉', '資訊系統'];
+  const $ = id => document.getElementById(id);
+  const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[c]));
+  const yearKey = y => Math.max(...(String(y).match(/\d+/g) || ['0']).map(Number));
+  const clone = a => JSON.parse(JSON.stringify(a));
+
+  let fileHandle = null;
+  let data;
+  let dirty = false;
+  let editing = -1;
+
+  // 載入：優先使用未存檔的草稿
+  let draft = null;
+  try { draft = JSON.parse(localStorage.getItem(DRAFT_KEY)); } catch (e) {}
+  if (Array.isArray(draft)) { data = draft; dirty = true; }
+  else data = clone(window.PROJECTS_DATA || []);
+
+  function toast(msg) {
+    const t = $('toast'); t.textContent = msg; t.classList.add('show');
+    clearTimeout(t._h); t._h = setTimeout(() => t.classList.remove('show'), 2600);
+  }
+  function setDirty(v) {
+    dirty = v;
+    $('state').textContent = v ? '尚未儲存' : (fileHandle ? '已儲存至資料檔' : '已載入');
+    $('state').classList.toggle('dirty', v);
+    try { v ? localStorage.setItem(DRAFT_KEY, JSON.stringify(data)) : localStorage.removeItem(DRAFT_KEY); } catch (e) {}
+  }
+
+  function refreshLists() {
+    const cats = [...new Set([...CAT_ORDER, ...data.map(d => d.category)])].filter(Boolean);
+    const sel = $('f-cat'), cur = sel.value;
+    sel.innerHTML = '<option value="">全部分類</option>' + cats.map(c => `<option>${esc(c)}</option>`).join('');
+    sel.value = cur;
+    $('cat-list').innerHTML = cats.map(c => `<option value="${esc(c)}">`).join('');
+    $('client-list').innerHTML = [...new Set(data.map(d => d.client))].filter(Boolean).sort().map(c => `<option value="${esc(c)}">`).join('');
+  }
+
+  function render() {
+    const cat = $('f-cat').value, q = $('f-q').value.trim().toLowerCase();
+    const list = data.map((d, i) => ({ d, i }))
+      .filter(({ d }) => (!cat || d.category === cat) && (!q || FIELDS.some(f => String(d[f] || '').toLowerCase().includes(q))))
+      .sort((a, b) => yearKey(b.d.year) - yearKey(a.d.year) || a.i - b.i);
+    $('rows').innerHTML = list.map(({ d, i }) => `
+      <tr>
+        <td>${esc(d.year)}</td>
+        <td><span class="tag">${esc(d.category)}</span></td>
+        <td>${esc(d.name)}</td>
+        <td>${esc(d.client)}</td>
+        <td class="${d.status === '已完成' ? 'st-done' : 'st-other'}">${esc(d.status)}</td>
+        <td class="actions"><button data-edit="${i}">編輯</button> <button class="del" data-del="${i}">刪除</button></td>
+      </tr>`).join('') || '<tr><td colspan="6" style="text-align:center;color:var(--muted);padding:24px">沒有符合的資料</td></tr>';
+    $('count').textContent = `顯示 ${list.length}／共 ${data.length} 件`;
+  }
+
+  function openForm(i) {
+    editing = i;
+    const d = i >= 0 ? data[i] : { category: $('f-cat').value || '', year: '', name: '', client: '', status: '已完成' };
+    $('dlg-title').textContent = i >= 0 ? '編輯實績' : '新增實績';
+    FIELDS.forEach(f => $('frm').elements[f].value = d[f] || '');
+    $('dlg').showModal();
+  }
+
+  $('frm').addEventListener('submit', () => {
+    const el = $('frm').elements;
+    const rec = Object.fromEntries(FIELDS.map(f => [f, el[f].value.trim()]));
+    if (editing >= 0) data[editing] = rec; else data.unshift(rec);
+    setDirty(true); refreshLists(); render();
+    toast(editing >= 0 ? '已更新' : '已新增');
+  });
+  $('dlg-cancel').onclick = () => $('dlg').close();
+
+  $('rows').addEventListener('click', e => {
+    const b = e.target.closest('button'); if (!b) return;
+    if (b.dataset.edit) openForm(+b.dataset.edit);
+    if (b.dataset.del) {
+      const i = +b.dataset.del;
+      if (confirm(`確定刪除？\n\n${data[i].year}｜${data[i].name}`)) {
+        data.splice(i, 1); setDirty(true); refreshLists(); render(); toast('已刪除');
+      }
+    }
+  });
+
+  $('btn-add').onclick = () => openForm(-1);
+  $('f-cat').onchange = render;
+  $('f-q').oninput = render;
+
+  // Excel 貼上
+  $('btn-paste').onclick = () => { $('paste-text').value = ''; $('dlg-paste').showModal(); };
+  $('paste-cancel').onclick = () => $('dlg-paste').close();
+  $('frm-paste').addEventListener('submit', () => {
+    const recs = $('paste-text').value.split(/\r?\n/).map(l => l.split('\t').map(s => s.trim()))
+      .filter(c => c.length >= 4 && c[2])
+      .map(c => ({ category: c[0], year: c[1], name: c[2], client: c[3], status: c[4] || '已完成' }));
+    if (!recs.length) { toast('沒有讀到資料，請確認欄位順序與 Tab 分隔'); return; }
+    data.unshift(...recs); setDirty(true); refreshLists(); render(); toast(`已加入 ${recs.length} 筆`);
+  });
+
+  // 檔案輸出
+  function serialize() {
+    const lines = data.map(d => '  ' + JSON.stringify(Object.fromEntries(FIELDS.map(f => [f, d[f] || '']))));
+    return '// 聚禾工程顧問有限公司 工作實績資料\n' +
+      '// 請使用 admin.html（實績管理）編輯後存檔覆蓋本檔；亦可手動編輯，格式需維持 JSON。\n' +
+      '// 欄位：category 分類｜year 年度（民國）｜name 計畫名稱｜client 委託單位｜status 履約狀況\n' +
+      `// 最後更新：${new Date().toLocaleString('zh-TW')}\n` +
+      'window.PROJECTS_DATA = [\n' + lines.join(',\n') + '\n];\n';
+  }
+  function parseFile(text) {
+    const m = text.match(/=\s*(\[[\s\S]*\])\s*;?\s*$/);
+    const arr = JSON.parse(m ? m[1] : text);
+    if (!Array.isArray(arr)) throw new Error('格式不符');
+    return arr;
+  }
+
+  $('btn-open').onclick = async () => {
+    if (!window.showOpenFilePicker) { toast('此瀏覽器不支援直接開檔，請使用 Chrome 或 Edge；或直接按「儲存」下載'); return; }
+    try {
+      [fileHandle] = await window.showOpenFilePicker({ types: [{ description: 'projects.js', accept: { 'text/javascript': ['.js'] } }] });
+      const arr = parseFile(await (await fileHandle.getFile()).text());
+      if (dirty && !confirm('目前有未儲存的變更。\n按「確定」以開啟的檔案內容取代；按「取消」保留目前變更（稍後儲存時會寫入此檔）。')) {
+        setDirty(true);
+      } else {
+        data = arr; setDirty(false);
+      }
+      refreshLists(); render(); toast(`已連結資料檔：${fileHandle.name}`);
+    } catch (e) { if (e.name !== 'AbortError') alert('開啟失敗：' + e.message); }
+  };
+
+  $('btn-save').onclick = async () => {
+    const text = serialize();
+    if (fileHandle) {
+      try {
+        const w = await fileHandle.createWritable(); await w.write(text); await w.close();
+        setDirty(false); toast('已儲存至資料檔'); return;
+      } catch (e) { alert('寫入失敗，改為下載檔案：' + e.message); }
+    }
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(new Blob([text], { type: 'text/javascript' }));
+    a.download = 'projects.js'; a.click(); URL.revokeObjectURL(a.href);
+    setDirty(false);
+    toast('已下載 projects.js，請覆蓋網站 assets/data/projects.js');
+  };
+
+  $('btn-reset').onclick = () => {
+    if (!confirm('確定放棄所有未儲存的變更？')) return;
+    try { localStorage.removeItem(DRAFT_KEY); } catch (e) {}
+    location.reload();
+  };
+
+  window.addEventListener('beforeunload', e => { if (dirty) { e.preventDefault(); e.returnValue = ''; } });
+
+  setDirty(dirty);
+  refreshLists();
+  render();
+})();
+</script>
+</body>
+</html>
