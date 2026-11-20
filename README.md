@@ -30,6 +30,18 @@ assets/img/              圖片
 - **聯絡資訊**：修改 `index.html` 的 `#contact` 區塊；表單的收件信箱在 `assets/js/main.js` 的 `initForm()`。
 - **圖片**：放入 `assets/img/` 後，修改 `index.html` 中對應的 `src`，圖片寬度建議不超過 1400px。
 
-## 上線方式（擇一）
+## 目前部署：GitHub Pages
+- 網址：https://yoshihuang.github.io/geoharvester-website/
+- 儲存庫：https://github.com/yoshihuang/geoharvester-website
+- **更新網站**（例如用 admin.html 改完實績後）：在本資料夾執行
+  ```
+  git add -A
+  git commit -m "更新工作實績"
+  git push
+  ```
+  約 1 分鐘後網站自動更新。也可以在 GitHub 網頁上直接上傳覆蓋 `assets/data/projects.js`。
+- `材料/` 和 `*.txt` 已設定在 `.gitignore`，不會上傳。
+
+## 其他上線方式（擇一）
 - **GitHub Pages、Netlify 或 Cloudflare Pages**：上傳整個資料夾（排除 `材料/`），免費，並支援自訂網域。
 - **自有主機或 NAS（Synology Web Station）**：把檔案複製到網站根目錄即可。如果 NAS 有對應成網路磁碟，可以用 admin.html 直接開啟、儲存 NAS 上的 `projects.js`，存檔後網站立即更新。
