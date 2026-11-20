@@ -31,8 +31,8 @@ assets/img/              圖片
 - **圖片**：放入 `assets/img/` 後，修改 `index.html` 中對應的 `src`，圖片寬度建議不超過 1400px。
 
 ## 目前部署：GitHub Pages
-- 網址：https://yoshihuang.github.io/geoharvester-website/
-- 儲存庫：https://github.com/yoshihuang/geoharvester-website
+- 網址：https://yoshihuang.github.io/geoharvester/
+- 儲存庫：https://github.com/yoshihuang/geoharvester
 - **更新網站**（例如用 admin.html 改完實績後）：在本資料夾執行
   ```
   git add -A
